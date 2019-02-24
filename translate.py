@@ -2,13 +2,18 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input
 from tensorflow.keras.callbacks import TensorBoard
 
+from multiprocessing import freeze_support
 from networks import encoder, decoder
 from utils.callbacks import TensorBoardImage
 from utils.data import DataGenerator, partition_dataset, load_dataset
-from multiprocessing import freeze_support
+
+
+# TODO Get parameters from argparse
+# TODO Get rid of hard-coded n_features, epochs
+# TODO Add augmentation random_cutout, flip_lr, flip_ud, rot90
 
 def main():
-    # Parameters TODO get them from argparse
+    # Parameters
     params = {'dim': (1024, 1024),
               'batch_size': 1,
               'X_channels': 1,
@@ -34,13 +39,14 @@ def train_autoencoder(X_dir, Y_dir, batch_size, dim, X_channels, Y_channels, log
     encoder_img = encoder(n_features=8)
     decoder_lbl = decoder(n_output_features=Y_channels, n_features=8)
     latent_img = encoder_img(input_img)
-    latent_lbl = latent_img
+    latent_lbl = latent_img   # TODO Put res_net here for image to label translation
     restored_lbl = decoder_lbl(latent_lbl)
     img2lbl = Model(input_img, restored_lbl)
     img2lbl.compile(optimizer='adadelta', loss='mean_squared_error')
-    print('Model contains %d layers.\n' % len(img2lbl.trainable_weights))
+    # Print summary
     img2lbl.summary()
-    # Train model on dataset
+    print('Model contains a total of %d trainable layers.\n' % len(img2lbl.trainable_weights))
+    # Train model
     tbi_callback = TensorBoardImage(log_dir=log_dir, validation_data=validation_generator)
     tb_callback = TensorBoard(log_dir=log_dir)
     img2lbl.fit_generator(generator=training_generator,
