@@ -1,3 +1,10 @@
+# PyCharm IDE
+.idea
+
+# directories
+datasets
+temp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
