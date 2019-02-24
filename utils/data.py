@@ -1,7 +1,5 @@
 import glob
 import random
-from functools import lru_cache
-
 import numpy as np
 from skimage.io import imread
 from tensorflow.keras.utils import Sequence
@@ -11,7 +9,7 @@ class DataGenerator(Sequence):
     """Generates data for Keras"""
     def __init__(self, list_IDs, batch_size=1, dim=(32,32), X_channels=1, Y_channels=1,
                  shuffle=True, **params):
-        'Initialization'
+        """Initialization"""
         self.dim = dim
         self.batch_size = batch_size
         self.list_IDs = list_IDs
@@ -21,11 +19,11 @@ class DataGenerator(Sequence):
         self.on_epoch_end()
 
     def __len__(self):
-        'Denotes the number of batches per epoch'
+        """Denotes the number of batches per epoch"""
         return int(np.floor(len(self.list_IDs) / self.batch_size))
 
     def __getitem__(self, index):
-        'Generate one batch of data'
+        """Generate one batch of data"""
         # Generate indexes of the batch
         indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
 
@@ -38,13 +36,13 @@ class DataGenerator(Sequence):
         return X, Y
 
     def on_epoch_end(self):
-        'Updates indexes after each epoch'
+        """Updates indexes after each epoch"""
         self.indexes = np.arange(len(self.list_IDs))
         if self.shuffle == True:
             np.random.shuffle(self.indexes)
 
     def __data_generation(self, pair_filenames):
-        'Generates data containing batch_size samples' # X : (n_samples, *dim, channels)
+        """ Generates data containing batch_size samples"""
         # Initialization
         X = np.empty((self.batch_size, *self.dim, self.X_channels))
         Y = np.empty((self.batch_size, *self.dim, self.Y_channels))
@@ -56,9 +54,9 @@ class DataGenerator(Sequence):
 
         return X, Y
 
-@lru_cache(maxsize=None)  # Caching images in memory
+
 def image_to_tensor(X_filename):
-    print('Reading %s' % X_filename)
+    # print('Reading %s' % X_filename)
     tensor = np.array(imread(X_filename))
     if len(tensor.shape) < 3:
         tensor = tensor[:, :, np.newaxis]
